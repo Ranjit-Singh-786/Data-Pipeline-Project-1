@@ -1,0 +1,5 @@
+{"timestamp": "2026-10-05T14:27:32.126218+00:00", "step": "pipeline_start", "mode": "gcs", "run_id": "20261005T142732Z", "dry_run": true}
+{"timestamp": "2026-10-05T14:27:32.131831+00:00", "step": "artifact_directory_created", "path": "artifacts\\20261005T142732Z"}
+{"timestamp": "2026-10-05T14:27:32.131831+00:00", "step": "mysql_extract_start", "host": "127.0.0.1", "port": 3306, "database": "insurance", "table": "insurance"}
+{"timestamp": "2026-10-05T14:27:34.208424+00:00", "step": "mysql_extract_error", "error": "2003: Can't connect to MySQL server on '127.0.0.1:3306' (Errno 10061: No connection could be made because the target machine actively refused it)"}
+{"timestamp": "2026-10-05T14:27:34.209424+00:00", "step": "pipeline_failed", "mode": "gcs", "error": "MySQL extraction failed: 2003: Can't connect to MySQL server on '127.0.0.1:3306' (Errno 10061: No connection could be made because the target machine actively refused it)"}
