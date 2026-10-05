@@ -1,0 +1,20 @@
+{
+  "run_id": "manual__2026-10-05T17:20:08+00:00",
+  "artifact_dir": "artifacts/manual__2026-10-05T17:20:08+00:00",
+  "files": [
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00001.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00002.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00003.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00004.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00005.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00006.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00007.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00008.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00009.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00010.parquet",
+    "artifacts/manual__2026-10-05T17:20:08+00:00/part-00011.parquet"
+  ],
+  "clean_rows": 2676,
+  "rejected_rows": 0,
+  "dry_run": false
+}

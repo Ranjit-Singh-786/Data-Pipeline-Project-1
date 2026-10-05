@@ -3,3 +3,182 @@
 {"timestamp": "2026-10-05T14:27:32.131831+00:00", "step": "mysql_extract_start", "host": "127.0.0.1", "port": 3306, "database": "insurance", "table": "insurance"}
 {"timestamp": "2026-10-05T14:27:34.208424+00:00", "step": "mysql_extract_error", "error": "2003: Can't connect to MySQL server on '127.0.0.1:3306' (Errno 10061: No connection could be made because the target machine actively refused it)"}
 {"timestamp": "2026-10-05T14:27:34.209424+00:00", "step": "pipeline_failed", "mode": "gcs", "error": "MySQL extraction failed: 2003: Can't connect to MySQL server on '127.0.0.1:3306' (Errno 10061: No connection could be made because the target machine actively refused it)"}
+{"timestamp": "2026-10-05T16:54:01.143571+00:00", "step": "pipeline_start", "mode": "gcs", "run_id": "20261005T165401Z", "dry_run": true}
+{"timestamp": "2026-10-05T16:54:01.145099+00:00", "step": "artifact_directory_created", "path": "artifacts\\20261005T165401Z"}
+{"timestamp": "2026-10-05T16:54:01.145099+00:00", "step": "mysql_extract_start", "host": "127.0.0.1", "port": 3306, "database": "insurance", "table": "insurance"}
+{"timestamp": "2026-10-05T16:54:01.292034+00:00", "step": "batch_read", "batch": 1, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.347992+00:00", "step": "batch_transformed_to_parquet", "batch": 1, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00001.parquet"}
+{"timestamp": "2026-10-05T16:54:01.353850+00:00", "step": "batch_read", "batch": 2, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.362712+00:00", "step": "batch_transformed_to_parquet", "batch": 2, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00002.parquet"}
+{"timestamp": "2026-10-05T16:54:01.368309+00:00", "step": "batch_read", "batch": 3, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.376962+00:00", "step": "batch_transformed_to_parquet", "batch": 3, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00003.parquet"}
+{"timestamp": "2026-10-05T16:54:01.383610+00:00", "step": "batch_read", "batch": 4, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.391783+00:00", "step": "batch_transformed_to_parquet", "batch": 4, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00004.parquet"}
+{"timestamp": "2026-10-05T16:54:01.400417+00:00", "step": "batch_read", "batch": 5, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.408463+00:00", "step": "batch_transformed_to_parquet", "batch": 5, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00005.parquet"}
+{"timestamp": "2026-10-05T16:54:01.414739+00:00", "step": "batch_read", "batch": 6, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.423057+00:00", "step": "batch_transformed_to_parquet", "batch": 6, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00006.parquet"}
+{"timestamp": "2026-10-05T16:54:01.429067+00:00", "step": "batch_read", "batch": 7, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.436745+00:00", "step": "batch_transformed_to_parquet", "batch": 7, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00007.parquet"}
+{"timestamp": "2026-10-05T16:54:01.443328+00:00", "step": "batch_read", "batch": 8, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.450348+00:00", "step": "batch_transformed_to_parquet", "batch": 8, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00008.parquet"}
+{"timestamp": "2026-10-05T16:54:01.457767+00:00", "step": "batch_read", "batch": 9, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.464048+00:00", "step": "batch_transformed_to_parquet", "batch": 9, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00009.parquet"}
+{"timestamp": "2026-10-05T16:54:01.471283+00:00", "step": "batch_read", "batch": 10, "rows": 250}
+{"timestamp": "2026-10-05T16:54:01.479726+00:00", "step": "batch_transformed_to_parquet", "batch": 10, "rows": 250, "path": "artifacts\\20261005T165401Z\\part-00010.parquet"}
+{"timestamp": "2026-10-05T16:54:01.482913+00:00", "step": "batch_read", "batch": 11, "rows": 176}
+{"timestamp": "2026-10-05T16:54:01.488410+00:00", "step": "batch_transformed_to_parquet", "batch": 11, "rows": 176, "path": "artifacts\\20261005T165401Z\\part-00011.parquet"}
+{"timestamp": "2026-10-05T16:54:01.488962+00:00", "step": "mysql_extract_complete", "total_rows": 2676}
+{"timestamp": "2026-10-05T16:54:01.493681+00:00", "step": "gcs_upload_dry_run", "bucket": "your-gcs-bucket", "files_count": 11}
+{"timestamp": "2026-10-05T16:54:01.493681+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00001.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00001.parquet"}
+{"timestamp": "2026-10-05T16:54:01.493681+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00002.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00002.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494261+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00003.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00003.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494261+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00004.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00004.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494261+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00005.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00005.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494261+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00006.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00006.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494261+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00007.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00007.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494261+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00008.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00008.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494261+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00009.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00009.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494776+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00010.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00010.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494776+00:00", "step": "gcs_upload_simulated", "path": "artifacts\\20261005T165401Z\\part-00011.parquet", "uri": "gs://your-gcs-bucket/insurance-poc/20261005T165401Z/part-00011.parquet"}
+{"timestamp": "2026-10-05T16:54:01.494776+00:00", "step": "bigquery_load_dry_run", "uris": 11, "table": "your-gcp-project.insurance_poc.insurance_clean"}
+{"timestamp": "2026-10-05T16:54:01.494776+00:00", "step": "pipeline_complete", "mode": "gcs", "loaded": 2676, "rejected": 0, "batches": 11}
+{"timestamp": "2026-10-05T17:17:35.158309+00:00", "step": "step_extract_transform_start", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "dry_run": false}
+{"timestamp": "2026-10-05T17:17:35.165423+00:00", "step": "artifact_directory_created", "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00"}
+{"timestamp": "2026-10-05T17:17:35.168183+00:00", "step": "mysql_extract_start", "host": "mysql", "port": 3306, "database": "insurance", "table": "insurance"}
+{"timestamp": "2026-10-05T17:17:35.262973+00:00", "step": "batch_read", "batch": 1, "rows": 250}
+{"timestamp": "2026-10-05T17:17:35.378174+00:00", "step": "batch_transformed_to_parquet", "batch": 1, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00001.parquet"}
+{"timestamp": "2026-10-05T17:17:35.385341+00:00", "step": "batch_read", "batch": 2, "rows": 250}
+{"timestamp": "2026-10-05T17:17:35.439192+00:00", "step": "batch_transformed_to_parquet", "batch": 2, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00002.parquet"}
+{"timestamp": "2026-10-05T17:17:35.443787+00:00", "step": "batch_read", "batch": 3, "rows": 250}
+{"timestamp": "2026-10-05T17:17:35.518544+00:00", "step": "batch_transformed_to_parquet", "batch": 3, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00003.parquet"}
+{"timestamp": "2026-10-05T17:17:35.523679+00:00", "step": "batch_read", "batch": 4, "rows": 250}
+{"timestamp": "2026-10-05T17:17:35.586845+00:00", "step": "batch_transformed_to_parquet", "batch": 4, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00004.parquet"}
+{"timestamp": "2026-10-05T17:17:35.591759+00:00", "step": "batch_read", "batch": 5, "rows": 250}
+{"timestamp": "2026-10-05T17:17:35.826299+00:00", "step": "batch_transformed_to_parquet", "batch": 5, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00005.parquet"}
+{"timestamp": "2026-10-05T17:17:35.833891+00:00", "step": "batch_read", "batch": 6, "rows": 250}
+{"timestamp": "2026-10-05T17:17:35.911300+00:00", "step": "batch_transformed_to_parquet", "batch": 6, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00006.parquet"}
+{"timestamp": "2026-10-05T17:17:35.916249+00:00", "step": "batch_read", "batch": 7, "rows": 250}
+{"timestamp": "2026-10-05T17:17:36.045561+00:00", "step": "batch_transformed_to_parquet", "batch": 7, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00007.parquet"}
+{"timestamp": "2026-10-05T17:17:36.050511+00:00", "step": "batch_read", "batch": 8, "rows": 250}
+{"timestamp": "2026-10-05T17:17:36.092281+00:00", "step": "batch_transformed_to_parquet", "batch": 8, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00008.parquet"}
+{"timestamp": "2026-10-05T17:17:36.097102+00:00", "step": "batch_read", "batch": 9, "rows": 250}
+{"timestamp": "2026-10-05T17:17:36.135548+00:00", "step": "batch_transformed_to_parquet", "batch": 9, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00009.parquet"}
+{"timestamp": "2026-10-05T17:17:36.139986+00:00", "step": "batch_read", "batch": 10, "rows": 250}
+{"timestamp": "2026-10-05T17:17:36.208687+00:00", "step": "batch_transformed_to_parquet", "batch": 10, "rows": 250, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00010.parquet"}
+{"timestamp": "2026-10-05T17:17:36.213232+00:00", "step": "batch_read", "batch": 11, "rows": 176}
+{"timestamp": "2026-10-05T17:17:36.361475+00:00", "step": "batch_transformed_to_parquet", "batch": 11, "rows": 176, "path": "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00011.parquet"}
+{"timestamp": "2026-10-05T17:17:36.367645+00:00", "step": "mysql_extract_complete", "total_rows": 2676}
+{"timestamp": "2026-10-05T17:17:36.384534+00:00", "step": "step_extract_transform_complete", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "artifact_dir": "artifacts/manual__2026-10-05T17:06:36.894323+00:00", "files": ["artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00001.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00002.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00003.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00004.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00005.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00006.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00007.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00008.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00009.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00010.parquet", "artifacts/manual__2026-10-05T17:06:36.894323+00:00/part-00011.parquet"], "clean_rows": 2676, "rejected_rows": 0, "dry_run": false}
+{"timestamp": "2026-10-05T17:17:38.377894+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:17:38.383493+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T17:20:08.124594+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:20:08.131985+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T17:20:11.192278+00:00", "step": "step_extract_transform_start", "run_id": "manual__2026-10-05T17:20:08+00:00", "dry_run": false}
+{"timestamp": "2026-10-05T17:20:11.197103+00:00", "step": "artifact_directory_created", "path": "artifacts/manual__2026-10-05T17:20:08+00:00"}
+{"timestamp": "2026-10-05T17:20:11.199791+00:00", "step": "mysql_extract_start", "host": "mysql", "port": 3306, "database": "insurance", "table": "insurance"}
+{"timestamp": "2026-10-05T17:20:11.240480+00:00", "step": "batch_read", "batch": 1, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.298179+00:00", "step": "batch_transformed_to_parquet", "batch": 1, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00001.parquet"}
+{"timestamp": "2026-10-05T17:20:11.302928+00:00", "step": "batch_read", "batch": 2, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.342800+00:00", "step": "batch_transformed_to_parquet", "batch": 2, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00002.parquet"}
+{"timestamp": "2026-10-05T17:20:11.370663+00:00", "step": "batch_read", "batch": 3, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.444992+00:00", "step": "batch_transformed_to_parquet", "batch": 3, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00003.parquet"}
+{"timestamp": "2026-10-05T17:20:11.449426+00:00", "step": "batch_read", "batch": 4, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.496961+00:00", "step": "batch_transformed_to_parquet", "batch": 4, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00004.parquet"}
+{"timestamp": "2026-10-05T17:20:11.501240+00:00", "step": "batch_read", "batch": 5, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.539046+00:00", "step": "batch_transformed_to_parquet", "batch": 5, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00005.parquet"}
+{"timestamp": "2026-10-05T17:20:11.542701+00:00", "step": "batch_read", "batch": 6, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.618370+00:00", "step": "batch_transformed_to_parquet", "batch": 6, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00006.parquet"}
+{"timestamp": "2026-10-05T17:20:11.622979+00:00", "step": "batch_read", "batch": 7, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.663667+00:00", "step": "batch_transformed_to_parquet", "batch": 7, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00007.parquet"}
+{"timestamp": "2026-10-05T17:20:11.668243+00:00", "step": "batch_read", "batch": 8, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.705076+00:00", "step": "batch_transformed_to_parquet", "batch": 8, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00008.parquet"}
+{"timestamp": "2026-10-05T17:20:11.710060+00:00", "step": "batch_read", "batch": 9, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.752068+00:00", "step": "batch_transformed_to_parquet", "batch": 9, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00009.parquet"}
+{"timestamp": "2026-10-05T17:20:11.756852+00:00", "step": "batch_read", "batch": 10, "rows": 250}
+{"timestamp": "2026-10-05T17:20:11.800179+00:00", "step": "batch_transformed_to_parquet", "batch": 10, "rows": 250, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00010.parquet"}
+{"timestamp": "2026-10-05T17:20:11.804376+00:00", "step": "batch_read", "batch": 11, "rows": 176}
+{"timestamp": "2026-10-05T17:20:11.846254+00:00", "step": "batch_transformed_to_parquet", "batch": 11, "rows": 176, "path": "artifacts/manual__2026-10-05T17:20:08+00:00/part-00011.parquet"}
+{"timestamp": "2026-10-05T17:20:11.849266+00:00", "step": "mysql_extract_complete", "total_rows": 2676}
+{"timestamp": "2026-10-05T17:20:11.858509+00:00", "step": "step_extract_transform_complete", "run_id": "manual__2026-10-05T17:20:08+00:00", "artifact_dir": "artifacts/manual__2026-10-05T17:20:08+00:00", "files": ["artifacts/manual__2026-10-05T17:20:08+00:00/part-00001.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00002.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00003.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00004.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00005.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00006.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00007.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00008.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00009.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00010.parquet", "artifacts/manual__2026-10-05T17:20:08+00:00/part-00011.parquet"], "clean_rows": 2676, "rejected_rows": 0, "dry_run": false}
+{"timestamp": "2026-10-05T17:20:14.025324+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:20:08+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:20:14.030081+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:20:08+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T17:23:46.040327+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:20:08+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:23:46.049782+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:20:08+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T17:26:21.939241+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:26:21.943997+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T17:29:43.967917+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:20:08+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:29:43.979510+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:20:08+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T17:36:24.555902+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:36:24.560692+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:06:36.894323+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T17:39:47.448615+00:00", "step": "step_upload_gcs_start", "run_id": "manual__2026-10-05T17:20:08+00:00", "files_count": 11, "dry_run": false}
+{"timestamp": "2026-10-05T17:39:47.456929+00:00", "step": "step_upload_gcs_failed", "run_id": "manual__2026-10-05T17:20:08+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:27:41.700443+00:00", "step": "api_pipeline_start", "run_id": "20261005T182741Z", "dry_run": true}
+{"timestamp": "2026-10-05T18:27:41.701443+00:00", "step": "api_step_extract_transform_start", "run_id": "20261005T182741Z", "dry_run": true}
+{"timestamp": "2026-10-05T18:27:41.734116+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+{"timestamp": "2026-10-05T18:27:41.737365+00:00", "step": "api_fetch_complete", "total_items": 50}
+{"timestamp": "2026-10-05T18:27:41.751623+00:00", "step": "api_batch_transformed_to_parquet", "rows": 50, "path": "artifacts\\api_change_action_20261005T182741Z\\part-00001.parquet"}
+{"timestamp": "2026-10-05T18:27:41.753872+00:00", "step": "api_step_extract_transform_complete", "run_id": "20261005T182741Z", "artifact_dir": "artifacts\\api_change_action_20261005T182741Z", "files": ["artifacts\\api_change_action_20261005T182741Z\\part-00001.parquet"], "clean_rows": 50, "rejected_rows": 0, "dry_run": true}
+{"timestamp": "2026-10-05T18:27:41.754884+00:00", "step": "api_step_upload_gcs_start", "run_id": "20261005T182741Z", "files_count": 1, "dry_run": true}
+{"timestamp": "2026-10-05T18:27:41.754884+00:00", "step": "api_gcs_upload_simulated", "path": "artifacts\\api_change_action_20261005T182741Z\\part-00001.parquet", "uri": "gs://your-gcs-bucket/change-actions/20261005T182741Z/part-00001.parquet"}
+{"timestamp": "2026-10-05T18:27:41.755270+00:00", "step": "api_step_upload_gcs_complete", "run_id": "20261005T182741Z", "uris": ["gs://your-gcs-bucket/change-actions/20261005T182741Z/part-00001.parquet"], "files_count": 1, "dry_run": true}
+{"timestamp": "2026-10-05T18:27:41.755270+00:00", "step": "api_step_load_bigquery_start", "run_id": "20261005T182741Z", "table": "your-gcp-project.insurance_poc.change_actions_clean", "uris_count": 1, "dry_run": true}
+{"timestamp": "2026-10-05T18:27:41.755776+00:00", "step": "api_bigquery_load_dry_run", "run_id": "20261005T182741Z", "uris": 1, "table": "your-gcp-project.insurance_poc.change_actions_clean"}
+{"timestamp": "2026-10-05T18:27:41.755776+00:00", "step": "api_step_load_bigquery_complete", "run_id": "20261005T182741Z", "table": "your-gcp-project.insurance_poc.change_actions_clean", "status": "SUCCESS_DRY_RUN"}
+{"timestamp": "2026-10-05T18:27:41.755776+00:00", "step": "api_pipeline_complete", "run_id": "20261005T182741Z", "clean_rows": 50, "rejected_rows": 0}
+{"timestamp": "2026-10-05T18:29:51.655235+00:00", "step": "api_pipeline_start", "run_id": "20261005T182951Z", "dry_run": true}
+{"timestamp": "2026-10-05T18:29:51.656239+00:00", "step": "api_step_extract_transform_start", "run_id": "20261005T182951Z", "dry_run": true}
+{"timestamp": "2026-10-05T18:29:51.656239+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+{"timestamp": "2026-10-05T18:29:51.657942+00:00", "step": "api_fetch_complete", "total_items": 50}
+{"timestamp": "2026-10-05T18:29:51.697504+00:00", "step": "api_batch_transformed_to_parquet", "rows": 50, "path": "artifacts\\api_change_action_20261005T182951Z\\part-00001.parquet"}
+{"timestamp": "2026-10-05T18:29:51.723586+00:00", "step": "api_step_extract_transform_complete", "run_id": "20261005T182951Z", "artifact_dir": "artifacts\\api_change_action_20261005T182951Z", "files": ["artifacts\\api_change_action_20261005T182951Z\\part-00001.parquet"], "clean_rows": 50, "rejected_rows": 0, "dry_run": true}
+{"timestamp": "2026-10-05T18:29:51.724773+00:00", "step": "api_step_upload_gcs_start", "run_id": "20261005T182951Z", "files_count": 1, "dry_run": true}
+{"timestamp": "2026-10-05T18:29:51.724773+00:00", "step": "api_gcs_upload_simulated", "path": "artifacts\\api_change_action_20261005T182951Z\\part-00001.parquet", "uri": "gs://your-gcs-bucket/change-actions/20261005T182951Z/part-00001.parquet"}
+{"timestamp": "2026-10-05T18:29:51.724773+00:00", "step": "api_step_upload_gcs_complete", "run_id": "20261005T182951Z", "uris": ["gs://your-gcs-bucket/change-actions/20261005T182951Z/part-00001.parquet"], "files_count": 1, "dry_run": true}
+{"timestamp": "2026-10-05T18:29:51.724773+00:00", "step": "api_step_load_bigquery_start", "run_id": "20261005T182951Z", "table": "your-gcp-project.insurance_poc.change_actions_clean", "uris_count": 1, "dry_run": true}
+{"timestamp": "2026-10-05T18:29:51.724773+00:00", "step": "api_bigquery_load_dry_run", "run_id": "20261005T182951Z", "uris": 1, "table": "your-gcp-project.insurance_poc.change_actions_clean"}
+{"timestamp": "2026-10-05T18:29:51.724773+00:00", "step": "api_step_load_bigquery_complete", "run_id": "20261005T182951Z", "table": "your-gcp-project.insurance_poc.change_actions_clean", "status": "SUCCESS_DRY_RUN"}
+{"timestamp": "2026-10-05T18:29:51.724773+00:00", "step": "api_pipeline_complete", "run_id": "20261005T182951Z", "clean_rows": 50, "rejected_rows": 0}
+{"timestamp": "2026-10-05T18:30:22.946789+00:00", "step": "api_step_extract_transform_start", "run_id": "manual__2026-10-05T18:30:19+00:00", "dry_run": false}
+{"timestamp": "2026-10-05T18:30:22.958222+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+{"timestamp": "2026-10-05T18:30:22.963268+00:00", "step": "api_step_extract_transform_failed", "run_id": "manual__2026-10-05T18:30:19+00:00", "error": "Neither API URL nor sample JSON file found at: sample.json"}
+{"timestamp": "2026-10-05T18:33:04.052380+00:00", "step": "api_step_extract_transform_start", "run_id": "manual__2026-10-05T18:32:31+00:00", "dry_run": false}
+{"timestamp": "2026-10-05T18:33:04.058024+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+{"timestamp": "2026-10-05T18:33:04.064552+00:00", "step": "api_fetch_complete", "total_items": 50}
+{"timestamp": "2026-10-05T18:33:04.135992+00:00", "step": "api_batch_transformed_to_parquet", "rows": 50, "path": "artifacts/api_change_action_manual__2026-10-05T18:32:31+00:00/part-00001.parquet"}
+{"timestamp": "2026-10-05T18:33:04.143701+00:00", "step": "api_step_extract_transform_complete", "run_id": "manual__2026-10-05T18:32:31+00:00", "artifact_dir": "artifacts/api_change_action_manual__2026-10-05T18:32:31+00:00", "files": ["artifacts/api_change_action_manual__2026-10-05T18:32:31+00:00/part-00001.parquet"], "clean_rows": 50, "rejected_rows": 0, "dry_run": false}
+{"timestamp": "2026-10-05T18:33:05.728056+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:32:31+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:33:05.734663+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:32:31+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:33:35.129671+00:00", "step": "api_step_extract_transform_start", "run_id": "manual__2026-10-05T18:30:19+00:00", "dry_run": false}
+{"timestamp": "2026-10-05T18:33:35.134329+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+{"timestamp": "2026-10-05T18:33:35.139978+00:00", "step": "api_fetch_complete", "total_items": 50}
+{"timestamp": "2026-10-05T18:33:35.229321+00:00", "step": "api_batch_transformed_to_parquet", "rows": 50, "path": "artifacts/api_change_action_manual__2026-10-05T18:30:19+00:00/part-00001.parquet"}
+{"timestamp": "2026-10-05T18:33:35.241330+00:00", "step": "api_step_extract_transform_complete", "run_id": "manual__2026-10-05T18:30:19+00:00", "artifact_dir": "artifacts/api_change_action_manual__2026-10-05T18:30:19+00:00", "files": ["artifacts/api_change_action_manual__2026-10-05T18:30:19+00:00/part-00001.parquet"], "clean_rows": 50, "rejected_rows": 0, "dry_run": false}
+{"timestamp": "2026-10-05T18:33:36.990732+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:30:19+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:33:36.995185+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:30:19+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:36:01.915967+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:30:19+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:36:01.921587+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:30:19+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:36:17.614568+00:00", "step": "api_step_extract_transform_start", "run_id": "manual__2026-10-05T18:36:15.327622+00:00", "dry_run": false}
+{"timestamp": "2026-10-05T18:36:17.622474+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+{"timestamp": "2026-10-05T18:36:17.629111+00:00", "step": "api_fetch_complete", "total_items": 50}
+{"timestamp": "2026-10-05T18:36:17.633238+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:32:31+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:36:17.639860+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:32:31+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:36:17.713311+00:00", "step": "api_batch_transformed_to_parquet", "rows": 50, "path": "artifacts/api_change_action_manual__2026-10-05T18:36:15.327622+00:00/part-00001.parquet"}
+{"timestamp": "2026-10-05T18:36:17.723227+00:00", "step": "api_step_extract_transform_complete", "run_id": "manual__2026-10-05T18:36:15.327622+00:00", "artifact_dir": "artifacts/api_change_action_manual__2026-10-05T18:36:15.327622+00:00", "files": ["artifacts/api_change_action_manual__2026-10-05T18:36:15.327622+00:00/part-00001.parquet"], "clean_rows": 50, "rejected_rows": 0, "dry_run": false}
+{"timestamp": "2026-10-05T18:36:19.768403+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:36:15.327622+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:36:19.776398+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:36:15.327622+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:36:59.281610+00:00", "step": "api_step_extract_transform_start", "run_id": "manual__2026-10-05T18:36:55.894330+00:00", "dry_run": false}
+{"timestamp": "2026-10-05T18:36:59.288753+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+{"timestamp": "2026-10-05T18:36:59.299005+00:00", "step": "api_fetch_complete", "total_items": 50}
+{"timestamp": "2026-10-05T18:36:59.358981+00:00", "step": "api_batch_transformed_to_parquet", "rows": 50, "path": "artifacts/api_change_action_manual__2026-10-05T18:36:55.894330+00:00/part-00001.parquet"}
+{"timestamp": "2026-10-05T18:36:59.431418+00:00", "step": "api_step_extract_transform_complete", "run_id": "manual__2026-10-05T18:36:55.894330+00:00", "artifact_dir": "artifacts/api_change_action_manual__2026-10-05T18:36:55.894330+00:00", "files": ["artifacts/api_change_action_manual__2026-10-05T18:36:55.894330+00:00/part-00001.parquet"], "clean_rows": 50, "rejected_rows": 0, "dry_run": false}
+{"timestamp": "2026-10-05T18:37:01.669250+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:36:55.894330+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:37:01.674527+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:36:55.894330+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:39:06.465775+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:36:15.327622+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:39:06.476722+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:36:15.327622+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:40:04.431114+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:30:19+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:40:04.435253+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:30:19+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:40:13.256540+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:36:55.894330+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:40:13.261584+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:36:55.894330+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+{"timestamp": "2026-10-05T18:41:10.967619+00:00", "step": "api_step_upload_gcs_start", "run_id": "manual__2026-10-05T18:32:31+00:00", "files_count": 1, "dry_run": false}
+{"timestamp": "2026-10-05T18:41:10.974274+00:00", "step": "api_step_upload_gcs_failed", "run_id": "manual__2026-10-05T18:32:31+00:00", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}

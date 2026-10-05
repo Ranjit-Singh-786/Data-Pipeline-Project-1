@@ -1,0 +1,91 @@
+[2026-10-05T17:09:47.195+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-10-05T17:09:47.239+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: insurance_batch_pipeline_gcs.mysql_python_gcs_bigquery manual__2026-10-05T17:06:36.894323+00:00 [queued]>
+[2026-10-05T17:09:47.249+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: insurance_batch_pipeline_gcs.mysql_python_gcs_bigquery manual__2026-10-05T17:06:36.894323+00:00 [queued]>
+[2026-10-05T17:09:47.281+0000] {taskinstance.py:2306} INFO - Starting attempt 2 of 4
+[2026-10-05T17:09:47.296+0000] {taskinstance.py:2330} INFO - Executing <Task(BashOperator): mysql_python_gcs_bigquery> on 2026-10-05 17:06:36.894323+00:00
+[2026-10-05T17:09:47.310+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'insurance_batch_pipeline_gcs', 'mysql_python_gcs_bigquery', 'manual__2026-10-05T17:06:36.894323+00:00', '--job-id', '3', '--raw', '--subdir', 'DAGS_FOLDER/insurance_pipeline_dag.py', '--cfg-path', '/tmp/tmpvndhgw2f']
+[2026-10-05T17:09:47.315+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=364) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-10-05T17:09:47.316+0000] {standard_task_runner.py:91} INFO - Job 3: Subtask mysql_python_gcs_bigquery
+[2026-10-05T17:09:47.317+0000] {standard_task_runner.py:63} INFO - Started process 365 to run task
+[2026-10-05T17:09:47.445+0000] {task_command.py:426} INFO - Running <TaskInstance: insurance_batch_pipeline_gcs.mysql_python_gcs_bigquery manual__2026-10-05T17:06:36.894323+00:00 [running]> on host 1f1f78db88a2
+[2026-10-05T17:09:47.576+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='data_engineering' AIRFLOW_CTX_DAG_ID='insurance_batch_pipeline_gcs' AIRFLOW_CTX_TASK_ID='mysql_python_gcs_bigquery' AIRFLOW_CTX_EXECUTION_DATE='2026-10-05T17:06:36.894323+00:00' AIRFLOW_CTX_TRY_NUMBER='2' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-10-05T17:06:36.894323+00:00'
+[2026-10-05T17:09:47.579+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-10-05T17:09:47.597+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-10-05T17:09:47.600+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'python -m pipeline.run_pipeline --mode gcs']
+[2026-10-05T17:09:47.618+0000] {subprocess.py:86} INFO - Output:
+[2026-10-05T17:09:49.669+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.668944+00:00", "step": "pipeline_start", "mode": "gcs", "run_id": "20261005T170949Z", "dry_run": false}
+[2026-10-05T17:09:49.671+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.670361+00:00", "step": "artifact_directory_created", "path": "artifacts/20261005T170949Z"}
+[2026-10-05T17:09:49.673+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.670452+00:00", "step": "mysql_extract_start", "host": "mysql", "port": 3306, "database": "insurance", "table": "insurance"}
+[2026-10-05T17:09:49.703+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.703308+00:00", "step": "batch_read", "batch": 1, "rows": 250}
+[2026-10-05T17:09:49.710+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.710227+00:00", "step": "batch_transformed_to_parquet", "batch": 1, "rows": 250, "path": "artifacts/20261005T170949Z/part-00001.parquet"}
+[2026-10-05T17:09:49.711+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.711420+00:00", "step": "batch_read", "batch": 2, "rows": 250}
+[2026-10-05T17:09:49.713+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.713413+00:00", "step": "batch_transformed_to_parquet", "batch": 2, "rows": 250, "path": "artifacts/20261005T170949Z/part-00002.parquet"}
+[2026-10-05T17:09:49.715+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.715646+00:00", "step": "batch_read", "batch": 3, "rows": 250}
+[2026-10-05T17:09:49.718+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.718450+00:00", "step": "batch_transformed_to_parquet", "batch": 3, "rows": 250, "path": "artifacts/20261005T170949Z/part-00003.parquet"}
+[2026-10-05T17:09:49.719+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.719588+00:00", "step": "batch_read", "batch": 4, "rows": 250}
+[2026-10-05T17:09:49.721+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.721716+00:00", "step": "batch_transformed_to_parquet", "batch": 4, "rows": 250, "path": "artifacts/20261005T170949Z/part-00004.parquet"}
+[2026-10-05T17:09:49.722+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.722589+00:00", "step": "batch_read", "batch": 5, "rows": 250}
+[2026-10-05T17:09:49.724+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.724670+00:00", "step": "batch_transformed_to_parquet", "batch": 5, "rows": 250, "path": "artifacts/20261005T170949Z/part-00005.parquet"}
+[2026-10-05T17:09:49.725+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.725702+00:00", "step": "batch_read", "batch": 6, "rows": 250}
+[2026-10-05T17:09:49.773+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.727253+00:00", "step": "batch_transformed_to_parquet", "batch": 6, "rows": 250, "path": "artifacts/20261005T170949Z/part-00006.parquet"}
+[2026-10-05T17:09:49.775+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.728034+00:00", "step": "batch_read", "batch": 7, "rows": 250}
+[2026-10-05T17:09:49.777+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.729771+00:00", "step": "batch_transformed_to_parquet", "batch": 7, "rows": 250, "path": "artifacts/20261005T170949Z/part-00007.parquet"}
+[2026-10-05T17:09:49.778+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.730722+00:00", "step": "batch_read", "batch": 8, "rows": 250}
+[2026-10-05T17:09:49.779+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.733420+00:00", "step": "batch_transformed_to_parquet", "batch": 8, "rows": 250, "path": "artifacts/20261005T170949Z/part-00008.parquet"}
+[2026-10-05T17:09:49.780+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.734238+00:00", "step": "batch_read", "batch": 9, "rows": 250}
+[2026-10-05T17:09:49.783+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.735694+00:00", "step": "batch_transformed_to_parquet", "batch": 9, "rows": 250, "path": "artifacts/20261005T170949Z/part-00009.parquet"}
+[2026-10-05T17:09:49.784+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.736475+00:00", "step": "batch_read", "batch": 10, "rows": 250}
+[2026-10-05T17:09:49.785+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.737960+00:00", "step": "batch_transformed_to_parquet", "batch": 10, "rows": 250, "path": "artifacts/20261005T170949Z/part-00010.parquet"}
+[2026-10-05T17:09:49.787+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.738652+00:00", "step": "batch_read", "batch": 11, "rows": 176}
+[2026-10-05T17:09:49.788+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.739963+00:00", "step": "batch_transformed_to_parquet", "batch": 11, "rows": 176, "path": "artifacts/20261005T170949Z/part-00011.parquet"}
+[2026-10-05T17:09:49.790+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.740053+00:00", "step": "mysql_extract_complete", "total_rows": 2676}
+[2026-10-05T17:09:49.791+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.741304+00:00", "step": "gcs_upload_start", "bucket": "your-gcs-bucket", "files_count": 11}
+[2026-10-05T17:09:49.792+0000] {subprocess.py:93} INFO - {"timestamp": "2026-10-05T17:09:49.741936+00:00", "step": "pipeline_failed", "mode": "gcs", "error": "File C:\\\\path\\\\to\\\\service-account.json was not found."}
+[2026-10-05T17:09:49.793+0000] {subprocess.py:93} INFO - Traceback (most recent call last):
+[2026-10-05T17:09:49.795+0000] {subprocess.py:93} INFO -   File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-10-05T17:09:49.795+0000] {subprocess.py:93} INFO -   File "<frozen runpy>", line 88, in _run_code
+[2026-10-05T17:09:49.796+0000] {subprocess.py:93} INFO -   File "/opt/***/pipeline/run_pipeline.py", line 177, in <module>
+[2026-10-05T17:09:49.800+0000] {subprocess.py:93} INFO -     run(mode=args.mode, dry_run=args.dry_run)
+[2026-10-05T17:09:49.801+0000] {subprocess.py:93} INFO -   File "/opt/***/pipeline/run_pipeline.py", line 126, in run
+[2026-10-05T17:09:49.807+0000] {subprocess.py:93} INFO -     storage_client = storage.Client(project=settings.project_id)
+[2026-10-05T17:09:49.809+0000] {subprocess.py:93} INFO -                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-10-05T17:09:49.811+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.12/site-packages/google/cloud/storage/client.py", line 226, in __init__
+[2026-10-05T17:09:49.905+0000] {subprocess.py:93} INFO -     super(Client, self).__init__(
+[2026-10-05T17:09:49.907+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.12/site-packages/google/cloud/client/__init__.py", line 321, in __init__
+[2026-10-05T17:09:49.909+0000] {subprocess.py:93} INFO -     Client.__init__(
+[2026-10-05T17:09:49.910+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.12/site-packages/google/cloud/client/__init__.py", line 178, in __init__
+[2026-10-05T17:09:49.911+0000] {subprocess.py:93} INFO -     credentials, _ = google.auth.default(scopes=scopes)
+[2026-10-05T17:09:49.912+0000] {subprocess.py:93} INFO -                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-10-05T17:09:49.913+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.12/site-packages/google/auth/_default.py", line 657, in default
+[2026-10-05T17:09:49.914+0000] {subprocess.py:93} INFO -     credentials, project_id = checker()
+[2026-10-05T17:09:49.916+0000] {subprocess.py:93} INFO -                               ^^^^^^^^^
+[2026-10-05T17:09:49.917+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.12/site-packages/google/auth/_default.py", line 650, in <lambda>
+[2026-10-05T17:09:49.918+0000] {subprocess.py:93} INFO -     lambda: _get_explicit_environ_credentials(quota_project_id=quota_project_id),
+[2026-10-05T17:09:49.919+0000] {subprocess.py:93} INFO -             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-10-05T17:09:49.920+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.12/site-packages/google/auth/_default.py", line 270, in _get_explicit_environ_credentials
+[2026-10-05T17:09:49.921+0000] {subprocess.py:93} INFO -     credentials, project_id = load_credentials_from_file(
+[2026-10-05T17:09:49.922+0000] {subprocess.py:93} INFO -                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-10-05T17:09:49.923+0000] {subprocess.py:93} INFO -   File "/home/***/.local/lib/python3.12/site-packages/google/auth/_default.py", line 114, in load_credentials_from_file
+[2026-10-05T17:09:49.924+0000] {subprocess.py:93} INFO -     raise exceptions.DefaultCredentialsError(
+[2026-10-05T17:09:49.925+0000] {subprocess.py:93} INFO - google.auth.exceptions.DefaultCredentialsError: File C:\\path\\to\\service-account.json was not found.
+[2026-10-05T17:09:50.044+0000] {subprocess.py:97} INFO - Command exited with return code 1
+[2026-10-05T17:09:50.047+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-10-05T17:09:50.059+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 460, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/bash.py", line 243, in execute
+    raise AirflowException(
+airflow.exceptions.AirflowException: Bash command failed. The command returned a non-zero exit code 1.
+[2026-10-05T17:09:50.065+0000] {taskinstance.py:1206} INFO - Marking task as UP_FOR_RETRY. dag_id=insurance_batch_pipeline_gcs, task_id=mysql_python_gcs_bigquery, run_id=manual__2026-10-05T17:06:36.894323+00:00, execution_date=20261005T170636, start_date=20261005T170947, end_date=20261005T170950
+[2026-10-05T17:09:50.186+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 3 for task mysql_python_gcs_bigquery (Bash command failed. The command returned a non-zero exit code 1.; 365)
+[2026-10-05T17:09:50.226+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2026-10-05T17:09:50.273+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-10-05T17:09:50.278+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

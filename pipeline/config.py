@@ -16,6 +16,7 @@ class Settings:
     location: str = os.getenv("GCP_LOCATION", "US")
     dataset: str = os.getenv("GCP_DATASET", "insurance_poc")
     table: str = os.getenv("GCP_TABLE", "insurance_clean")
+    # GCP Config
     bucket: str = os.getenv("GCS_BUCKET", "")
     gcs_prefix: str = os.getenv("GCS_PREFIX", "insurance-poc")
     batch_size: int = int(os.getenv("BATCH_SIZE", "250"))
@@ -23,6 +24,13 @@ class Settings:
     log_dir: str = os.getenv("LOG_DIR", "logs")
     log_file: str = os.getenv("LOG_FILE", os.path.join(os.getenv("LOG_DIR", "logs"), "pipeline.log"))
     dry_run: bool = os.getenv("DRY_RUN", "false").lower() in ("true", "1", "yes")
+
+    # Change Action API Source Config
+    change_action_api_url: str = os.getenv("CHANGE_ACTION_API_URL", "")
+    sample_json_path: str = os.getenv("SAMPLE_JSON_PATH", "sample.json")
+    api_table: str = os.getenv("GCP_API_TABLE", "change_actions_clean")
+    api_gcs_prefix: str = os.getenv("GCS_API_PREFIX", "change-actions")
+
 
     def validate_gcp_config(self) -> None:
         """Validates GCP config; raises ValueError if missing parameters when not in dry-run mode."""

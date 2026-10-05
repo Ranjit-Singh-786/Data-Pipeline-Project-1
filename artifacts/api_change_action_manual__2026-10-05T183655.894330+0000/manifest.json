@@ -1,0 +1,10 @@
+{
+  "run_id": "manual__2026-10-05T18:36:55.894330+00:00",
+  "artifact_dir": "artifacts/api_change_action_manual__2026-10-05T18:36:55.894330+00:00",
+  "files": [
+    "artifacts/api_change_action_manual__2026-10-05T18:36:55.894330+00:00/part-00001.parquet"
+  ],
+  "clean_rows": 50,
+  "rejected_rows": 0,
+  "dry_run": false
+}

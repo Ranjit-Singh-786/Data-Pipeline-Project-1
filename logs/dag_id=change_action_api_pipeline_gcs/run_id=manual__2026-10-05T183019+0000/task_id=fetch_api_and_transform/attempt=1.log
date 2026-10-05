@@ -1,0 +1,47 @@
+[2026-10-05T18:30:22.482+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-10-05T18:30:22.533+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: change_action_api_pipeline_gcs.fetch_api_and_transform manual__2026-10-05T18:30:19+00:00 [queued]>
+[2026-10-05T18:30:22.543+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: change_action_api_pipeline_gcs.fetch_api_and_transform manual__2026-10-05T18:30:19+00:00 [queued]>
+[2026-10-05T18:30:22.575+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 4
+[2026-10-05T18:30:22.592+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): fetch_api_and_transform> on 2026-10-05 18:30:19+00:00
+[2026-10-05T18:30:22.613+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'change_action_api_pipeline_gcs', 'fetch_api_and_transform', 'manual__2026-10-05T18:30:19+00:00', '--job-id', '15', '--raw', '--subdir', 'DAGS_FOLDER/change_action_pipeline_dag.py', '--cfg-path', '/tmp/tmp53xemco7']
+[2026-10-05T18:30:22.616+0000] {standard_task_runner.py:91} INFO - Job 15: Subtask fetch_api_and_transform
+[2026-10-05T18:30:22.619+0000] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=1364) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-10-05T18:30:22.621+0000] {standard_task_runner.py:63} INFO - Started process 1366 to run task
+[2026-10-05T18:30:22.729+0000] {task_command.py:426} INFO - Running <TaskInstance: change_action_api_pipeline_gcs.fetch_api_and_transform manual__2026-10-05T18:30:19+00:00 [running]> on host 1f1f78db88a2
+[2026-10-05T18:30:22.909+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='data_engineering' AIRFLOW_CTX_DAG_ID='change_action_api_pipeline_gcs' AIRFLOW_CTX_TASK_ID='fetch_api_and_transform' AIRFLOW_CTX_EXECUTION_DATE='2026-10-05T18:30:19+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-10-05T18:30:19+00:00'
+[2026-10-05T18:30:22.913+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-10-05T18:30:22.948+0000] {logging_mixin.py:188} WARNING - {"timestamp": "2026-10-05T18:30:22.946789+00:00", "step": "api_step_extract_transform_start", "run_id": "manual__2026-10-05T18:30:19+00:00", "dry_run": false}
+[2026-10-05T18:30:22.946+0000] {logging_utils.py:39} INFO - {"timestamp": "2026-10-05T18:30:22.946789+00:00", "step": "api_step_extract_transform_start", "run_id": "manual__2026-10-05T18:30:19+00:00", "dry_run": false}
+[2026-10-05T18:30:22.959+0000] {logging_mixin.py:188} WARNING - {"timestamp": "2026-10-05T18:30:22.958222+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+[2026-10-05T18:30:22.958+0000] {logging_utils.py:39} INFO - {"timestamp": "2026-10-05T18:30:22.958222+00:00", "step": "api_fallback_to_sample_json", "path": "sample.json"}
+[2026-10-05T18:30:22.964+0000] {logging_mixin.py:188} WARNING - {"timestamp": "2026-10-05T18:30:22.963268+00:00", "step": "api_step_extract_transform_failed", "run_id": "manual__2026-10-05T18:30:19+00:00", "error": "Neither API URL nor sample JSON file found at: sample.json"}
+[2026-10-05T18:30:22.963+0000] {logging_utils.py:39} INFO - {"timestamp": "2026-10-05T18:30:22.963268+00:00", "step": "api_step_extract_transform_failed", "run_id": "manual__2026-10-05T18:30:19+00:00", "error": "Neither API URL nor sample JSON file found at: sample.json"}
+[2026-10-05T18:30:22.966+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-10-05T18:30:22.967+0000] {taskinstance.py:2905} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 460, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 432, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 401, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 235, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 252, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/pipeline/run_api_pipeline.py", line 116, in task_fetch_api_and_transform
+    raw_items = fetch_change_actions(settings, logger)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/pipeline/run_api_pipeline.py", line 48, in fetch_change_actions
+    raise FileNotFoundError(f"Neither API URL nor sample JSON file found at: {sample_path}")
+FileNotFoundError: Neither API URL nor sample JSON file found at: sample.json
+[2026-10-05T18:30:22.992+0000] {taskinstance.py:1206} INFO - Marking task as UP_FOR_RETRY. dag_id=change_action_api_pipeline_gcs, task_id=fetch_api_and_transform, run_id=manual__2026-10-05T18:30:19+00:00, execution_date=20261005T183019, start_date=20261005T183022, end_date=20261005T183022
+[2026-10-05T18:30:23.011+0000] {standard_task_runner.py:110} ERROR - Failed to execute job 15 for task fetch_api_and_transform (Neither API URL nor sample JSON file found at: sample.json; 1366)
+[2026-10-05T18:30:23.038+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 1
+[2026-10-05T18:30:23.069+0000] {taskinstance.py:3503} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-10-05T18:30:23.123+0000] {local_task_job_runner.py:222} INFO - ::endgroup::
