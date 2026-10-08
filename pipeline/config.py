@@ -7,7 +7,7 @@ load_dotenv()
 @dataclass(frozen=True)
 class Settings:
     mysql_host: str = os.getenv("MYSQL_HOST", "127.0.0.1")
-    mysql_port: int = int(os.getenv("MYSQL_PORT", "3306"))
+    mysql_port: int = int(os.getenv("MYSQL_PORT") or "3306")
     mysql_database: str = os.getenv("MYSQL_DATABASE", "insurance")
     mysql_user: str = os.getenv("MYSQL_USER", "insurance_user")
     mysql_password: str = os.getenv("MYSQL_PASSWORD", "insurance_password")
@@ -19,7 +19,7 @@ class Settings:
     # GCP Config
     bucket: str = os.getenv("GCS_BUCKET", "")
     gcs_prefix: str = os.getenv("GCS_PREFIX", "insurance-poc")
-    batch_size: int = int(os.getenv("BATCH_SIZE", "250"))
+    batch_size: int = int(os.getenv("BATCH_SIZE") or "250")
     artifact_dir: str = os.getenv("ARTIFACT_DIR", "artifacts")
     log_dir: str = os.getenv("LOG_DIR", "logs")
     log_file: str = os.getenv("LOG_FILE", os.path.join(os.getenv("LOG_DIR", "logs"), "pipeline.log"))

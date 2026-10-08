@@ -5,6 +5,9 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional, Union
 
+
+
+
 def get_logger(name: str = "insurance_pipeline", log_file: Optional[Union[str, Path]] = None, log_dir: Optional[Union[str, Path]] = None) -> logging.Logger:
     logger = logging.getLogger(name)
     if logger.handlers:
@@ -37,3 +40,7 @@ def get_logger(name: str = "insurance_pipeline", log_file: Optional[Union[str, P
 
 def log_step(logger: logging.Logger, step: str, **details):
     logger.info(json.dumps({"timestamp": datetime.now(timezone.utc).isoformat(), "step": step, **details}, default=str))
+
+
+
+

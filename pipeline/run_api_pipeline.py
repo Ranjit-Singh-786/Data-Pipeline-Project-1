@@ -93,7 +93,7 @@ def validate_and_transform_change_actions(raw_items: List[Dict[str, Any]]) -> Tu
     return cleaned, rejected
 
 # ---------------------------------------------------------------------------
-# STEP 1: Fetch API & Transform to Parquet
+# STEP 1: Fetch API & Transform to Parquet  
 # ---------------------------------------------------------------------------
 def task_fetch_api_and_transform(run_id: Optional[str] = None, dry_run: bool = False, **kwargs) -> dict:
     settings = Settings()

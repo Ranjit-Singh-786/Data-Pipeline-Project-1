@@ -1,0 +1,10 @@
+{
+  "run_id": "20261008T191001Z",
+  "artifact_dir": "artifacts\\api_change_action_20261008T191001Z",
+  "files": [
+    "artifacts\\api_change_action_20261008T191001Z\\part-00001.parquet"
+  ],
+  "clean_rows": 50,
+  "rejected_rows": 0,
+  "dry_run": false
+}

@@ -64,7 +64,7 @@ def save_rejected_records(rejected_records: list, output_path: Path) -> None:
             f.write(json.dumps(rec, default=str) + "\n")
 
 # ---------------------------------------------------------------------------
-# STEP 1: Extract & Transform to Parquet
+# STEP 1: Extract & Transform to Parquet  
 # ---------------------------------------------------------------------------
 def task_extract_and_transform(run_id: Optional[str] = None, dry_run: bool = False, **kwargs) -> dict:
     settings = Settings()

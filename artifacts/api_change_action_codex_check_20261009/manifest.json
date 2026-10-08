@@ -1,0 +1,10 @@
+{
+  "run_id": "codex_check_20261009",
+  "artifact_dir": "artifacts\\api_change_action_codex_check_20261009",
+  "files": [
+    "artifacts\\api_change_action_codex_check_20261009\\part-00001.parquet"
+  ],
+  "clean_rows": 50,
+  "rejected_rows": 0,
+  "dry_run": true
+}

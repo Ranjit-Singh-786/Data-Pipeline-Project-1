@@ -48,7 +48,7 @@ services:
       - ./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot@123"]
-      interval: 5s
+      interval: 60s
       timeout: 5s
       retries: 5
 
@@ -64,7 +64,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 5s
+      interval: 60s
       timeout: 5s
       retries: 5
 
