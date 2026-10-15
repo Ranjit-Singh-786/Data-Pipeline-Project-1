@@ -1,0 +1,8 @@
+{
+  "run_id": "20261015T122709Z",
+  "bronze_uri": "gs://batchpipes/bronze/15102026/rawfile.json",
+  "date_str": "15102026",
+  "artifact_dir": "artifacts\\api_change_action_20261015T122709Z",
+  "raw_file": "artifacts\\api_change_action_20261015T122709Z\\bronze\\15102026\\rawfile.json",
+  "dry_run": true
+}

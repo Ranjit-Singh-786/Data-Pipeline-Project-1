@@ -1,7 +1,11 @@
 apache-airflow>=2.8,<3
 google-cloud-bigquery>=3.25
+google-cloud-bigquery-connection>=1.23
 google-cloud-storage>=2.18
 mysql-connector-python>=9.0
 pyarrow>=17.0
 python-dotenv>=1.0
 pandas>=2.2
+pyiceberg[pyarrow]>=0.8.0
+gcsfs>=2024.1.0
+sqlalchemy>=2.0.0

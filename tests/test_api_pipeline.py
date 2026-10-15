@@ -5,10 +5,12 @@ from pipeline.run_api_pipeline import (
     validate_and_transform_change_actions,
     fetch_change_actions,
     CHANGE_ACTION_SCHEMA,
+    ICEBERG_SCHEMA,
     write_parquet,
     task_extract_to_bronze_gcs,
     task_transform_bronze_to_silver,
     task_load_silver_to_bigquery,
+    task_sync_iceberg_to_bigquery,
 )
 from pipeline.config import Settings
 
@@ -62,7 +64,7 @@ def test_change_action_dag_structure():
     from dags.change_action_pipeline_dag import dag
     assert dag.dag_id == "change_action_api_pipeline_gcs"
     assert {t.task_id for t in dag.tasks} == {
-        "extract_to_bronze", "transform_bronze_to_silver", "load_silver_to_bigquery"
+        "extract_to_bronze", "transform_bronze_to_silver", "load_silver_to_bigquery", "sync_iceberg_to_bigquery"
     }
 
 def test_medallion_pipeline_dry_run():
@@ -79,8 +81,9 @@ def test_medallion_pipeline_dry_run():
     )
     assert "processed/15102026/processed_data.parquet" in silver_res["silver_uri"]
     assert silver_res["clean_rows"] > 0
+    assert silver_res["iceberg_metadata_uri"] is not None
 
-    # Gold step (WRITE_TRUNCATE)
+    # Gold step A (WRITE_TRUNCATE)
     gold_res = task_load_silver_to_bigquery(
         run_id="test_medallion_run",
         dry_run=True,
@@ -88,3 +91,11 @@ def test_medallion_pipeline_dry_run():
     )
     assert gold_res["status"] == "SUCCESS_DRY_RUN"
     assert gold_res["loaded_uris"] == 1
+
+    # Gold step B (Iceberg BigLake Sync)
+    iceberg_res = task_sync_iceberg_to_bigquery(
+        run_id="test_medallion_run",
+        dry_run=True,
+        iceberg_metadata_uri=silver_res["iceberg_metadata_uri"]
+    )
+    assert iceberg_res["status"] == "SUCCESS_DRY_RUN"

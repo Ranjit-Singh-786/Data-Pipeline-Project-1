@@ -31,6 +31,13 @@ class Settings:
     api_table: str = os.getenv("GCP_API_TABLE", "change_actions_clean")
     api_gcs_prefix: str = os.getenv("GCS_API_PREFIX", "change-actions")
 
+    # Apache Iceberg & BigLake Config
+    iceberg_enabled: bool = os.getenv("ICEBERG_ENABLED", "true").lower() in ("true", "1", "yes")
+    iceberg_warehouse: str = os.getenv("ICEBERG_WAREHOUSE", "")
+    iceberg_table: str = os.getenv("ICEBERG_TABLE", "change_actions_iceberg")
+    iceberg_catalog_uri: str = os.getenv("ICEBERG_CATALOG_URI", "")
+    biglake_connection: str = os.getenv("BIGLAKE_CONNECTION", "us.gcs_iceberg_conn")
+
 
     def validate_gcp_config(self) -> None:
         """Validates GCP config; raises ValueError if missing parameters when not in dry-run mode."""
@@ -49,4 +56,3 @@ class Settings:
             raise ValueError(f"Missing required GCP configurations: {', '.join(missing)}. Set them in .env or run with --dry-run.")
 
 Config = Settings
-

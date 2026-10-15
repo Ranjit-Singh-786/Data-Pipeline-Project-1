@@ -1,11 +1,16 @@
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict, Any, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 from google.cloud import bigquery, storage
+from pyiceberg.catalog import load_catalog
+from pyiceberg.schema import Schema
+from pyiceberg.types import NestedField, StringType
+
 from pipeline.config import Settings
 from pipeline.logging_utils import get_logger, log_step
 
@@ -17,6 +22,15 @@ CHANGE_ACTION_SCHEMA = pa.schema([
     ("relative_path", pa.string()),
     ("state", pa.string()),
 ])
+
+# Apache Iceberg Schema corresponding to Change Action records
+ICEBERG_SCHEMA = Schema(
+    NestedField(field_id=1, name="source", field_type=StringType(), required=False),
+    NestedField(field_id=2, name="type", field_type=StringType(), required=False),
+    NestedField(field_id=3, name="identifier", field_type=StringType(), required=False),
+    NestedField(field_id=4, name="relative_path", field_type=StringType(), required=False),
+    NestedField(field_id=5, name="state", field_type=StringType(), required=False),
+)
 
 def write_parquet(records: List[dict], path: Path) -> None:
     table = pa.Table.from_pylist(records, schema=CHANGE_ACTION_SCHEMA)
@@ -104,6 +118,65 @@ def validate_and_transform_change_actions(raw_items: List[Dict[str, Any]]) -> Tu
 
     return cleaned, rejected
 
+def sanitize_iceberg_metadata_for_bigquery(metadata_uri: str, settings: Settings, logger) -> None:
+    """Sanitizes metadata JSON by removing null integer fields (e.g. parent-snapshot-id) that BigQuery parser rejects."""
+    if not metadata_uri.startswith("gs://"):
+        return
+    try:
+        bucket_name, blob_name = parse_gcs_uri(metadata_uri)
+        storage_client = storage.Client(project=settings.project_id)
+        blob = storage_client.bucket(bucket_name).blob(blob_name)
+        if not blob.exists():
+            return
+        data = json.loads(blob.download_as_text())
+        changed = False
+        for snap in data.get("snapshots", []):
+            for field in ("parent-snapshot-id", "first-row-id", "added-rows"):
+                if snap.get(field) is None and field in snap:
+                    del snap[field]
+                    changed = True
+        if changed:
+            blob.upload_from_string(json.dumps(data, indent=2), content_type="application/json")
+            log_step(logger, "iceberg_metadata_sanitized", uri=metadata_uri)
+    except Exception as exc:
+        log_step(logger, "iceberg_metadata_sanitize_warning", error=str(exc))
+
+def append_to_iceberg_table(records: List[dict], settings: Settings, logger, dry_run: bool = False) -> Optional[str]:
+    """Appends records to Apache Iceberg table on GCS and returns latest metadata URI."""
+    if not records:
+        return None
+    warehouse_uri = settings.iceberg_warehouse or f"gs://{settings.bucket}/iceberg_warehouse"
+    full_table_name = f"{settings.dataset}.{settings.iceberg_table}"
+
+    if dry_run:
+        fake_meta_uri = f"{warehouse_uri}/{settings.dataset}/{settings.iceberg_table}/metadata/00001-simulated.metadata.json"
+        log_step(logger, "iceberg_append_simulated", table=full_table_name, uri=fake_meta_uri, rows=len(records))
+        return fake_meta_uri
+
+    try:
+        os.environ["PYICEBERG_LEGACY_CURRENT_SNAPSHOT_ID"] = "True"
+        catalog_dir = Path(settings.artifact_dir)
+        catalog_dir.mkdir(parents=True, exist_ok=True)
+        catalog_uri = settings.iceberg_catalog_uri or f"sqlite:///{catalog_dir.resolve()}/iceberg_catalog.db"
+
+        catalog = load_catalog("gcs_iceberg", **{
+            "type": "sql",
+            "uri": catalog_uri,
+            "warehouse": warehouse_uri,
+        })
+
+        catalog.create_namespace_if_not_exists(settings.dataset)
+        table = catalog.create_table_if_not_exists(full_table_name, schema=ICEBERG_SCHEMA)
+        pa_table = pa.Table.from_pylist(records)
+        table.append(pa_table)
+        metadata_location = table.metadata_location
+        sanitize_iceberg_metadata_for_bigquery(metadata_location, settings, logger)
+        log_step(logger, "iceberg_append_complete", table=full_table_name, metadata=metadata_location, rows=len(records))
+        return metadata_location
+    except Exception as e:
+        log_step(logger, "iceberg_append_failed", table=full_table_name, error=str(e))
+        raise
+
 # ---------------------------------------------------------------------------
 # STEP 1 (Bronze Layer): Fetch API Raw Data & Upload to GCS bronze/ddmmyyyy/rawfile.json
 # ---------------------------------------------------------------------------
@@ -167,7 +240,7 @@ def task_extract_to_bronze_gcs(run_id: Optional[str] = None, dry_run: bool = Fal
         raise
 
 # ---------------------------------------------------------------------------
-# STEP 2 (Silver Layer): Read Raw Data from GCS, Validate/Transform, Upload Parquet to GCS
+# STEP 2 (Silver Layer): Read from GCS, Validate/Transform, Upload Parquet & Write Iceberg
 # ---------------------------------------------------------------------------
 def task_transform_bronze_to_silver(run_id: Optional[str] = None, dry_run: bool = False, bronze_uri: Optional[str] = None, **kwargs) -> dict:
     settings = Settings()
@@ -254,9 +327,15 @@ def task_transform_bronze_to_silver(run_id: Optional[str] = None, dry_run: bool 
             silver_uri = f"gs://{settings.bucket}/{silver_blob_name}"
             log_step(logger, "silver_gcs_upload", path=str(silver_parquet_path), uri=silver_uri)
 
+        # Apache Iceberg Append
+        iceberg_metadata_uri = None
+        if settings.iceberg_enabled and clean_records:
+            iceberg_metadata_uri = append_to_iceberg_table(clean_records, settings, logger, dry_run=dry_run)
+
         result_payload = {
             "run_id": run_id,
             "silver_uri": silver_uri,
+            "iceberg_metadata_uri": iceberg_metadata_uri,
             "files": [str(silver_parquet_path)],
             "clean_rows": len(clean_records),
             "rejected_rows": len(bad_records),
@@ -275,7 +354,7 @@ def task_transform_bronze_to_silver(run_id: Optional[str] = None, dry_run: bool 
         raise
 
 # ---------------------------------------------------------------------------
-# STEP 3 (Gold Layer): Load from GCS (Silver Parquet) into BigQuery (WRITE_TRUNCATE)
+# STEP 3A (Gold Layer): Load from GCS (Silver Parquet) into BigQuery (WRITE_TRUNCATE)
 # ---------------------------------------------------------------------------
 def task_load_silver_to_bigquery(run_id: Optional[str] = None, dry_run: bool = False, silver_uri: Optional[str] = None, uris: Optional[List[str]] = None, **kwargs) -> dict:
     settings = Settings()
@@ -333,6 +412,61 @@ def task_load_silver_to_bigquery(run_id: Optional[str] = None, dry_run: bool = F
         log_step(logger, "api_step_load_bigquery_failed", run_id=run_id, table=table_id, error=str(e))
         raise
 
+# ---------------------------------------------------------------------------
+# STEP 3B (Gold Layer): Sync Iceberg Metadata to BigQuery BigLake External Table
+# ---------------------------------------------------------------------------
+def task_sync_iceberg_to_bigquery(run_id: Optional[str] = None, dry_run: bool = False, iceberg_metadata_uri: Optional[str] = None, **kwargs) -> dict:
+    settings = Settings()
+    dry_run = dry_run or settings.dry_run
+    logger = get_logger("change_action_api_pipeline", log_file=settings.log_file)
+
+    ti = kwargs.get("ti")
+    if ti and not iceberg_metadata_uri:
+        upstream_data = ti.xcom_pull(task_ids="transform_bronze_to_silver") or ti.xcom_pull(task_ids="task_transform_bronze_to_silver")
+        if upstream_data:
+            iceberg_metadata_uri = upstream_data.get("iceberg_metadata_uri", iceberg_metadata_uri)
+            run_id = upstream_data.get("run_id", run_id)
+            dry_run = upstream_data.get("dry_run", dry_run)
+
+    if not run_id:
+        ti_obj = kwargs.get("ti")
+        if ti_obj and hasattr(ti_obj, "execution_date") and ti_obj.execution_date:
+            run_id = ti_obj.execution_date.strftime("%Y%m%dT%H%M%SZ")
+        else:
+            run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+    table_id = f"{settings.project_id}.{settings.dataset}.{settings.iceberg_table}" if settings.project_id else f"{settings.dataset}.{settings.iceberg_table}"
+
+    if not iceberg_metadata_uri:
+        log_step(logger, "iceberg_sync_bigquery_skipped", run_id=run_id, message="No Iceberg metadata URI to sync.")
+        return {"run_id": run_id, "status": "SKIPPED", "table": table_id}
+
+    log_step(logger, "iceberg_sync_bigquery_start", run_id=run_id, table=table_id, metadata_uri=iceberg_metadata_uri, dry_run=dry_run)
+
+    try:
+        if dry_run:
+            log_step(logger, "iceberg_sync_bigquery_simulated", run_id=run_id, table=table_id, metadata_uri=iceberg_metadata_uri)
+            log_step(logger, "iceberg_sync_bigquery_complete", run_id=run_id, table=table_id, status="SUCCESS_DRY_RUN")
+            return {"run_id": run_id, "table": table_id, "status": "SUCCESS_DRY_RUN", "metadata_uri": iceberg_metadata_uri}
+        else:
+            bq_client = bigquery.Client(project=settings.project_id)
+            bq_client.delete_table(table_id, not_found_ok=True)
+            sql = f"""
+            CREATE EXTERNAL TABLE `{table_id}`
+            WITH CONNECTION `{settings.biglake_connection}`
+            OPTIONS (
+              format = 'ICEBERG',
+              uris = ['{iceberg_metadata_uri}']
+            )
+            """
+            bq_client.query(sql).result()
+            log_step(logger, "iceberg_sync_bigquery_complete", run_id=run_id, table=table_id, metadata_uri=iceberg_metadata_uri)
+            return {"run_id": run_id, "table": table_id, "status": "SUCCESS", "metadata_uri": iceberg_metadata_uri}
+
+    except Exception as e:
+        log_step(logger, "iceberg_sync_bigquery_failed", run_id=run_id, table=table_id, error=str(e))
+        raise
+
 # Backward compatibility aliases
 task_fetch_api_and_transform = task_extract_to_bronze_gcs
 task_upload_api_to_gcs = task_transform_bronze_to_silver
@@ -352,18 +486,23 @@ def run(dry_run: bool = False, run_id: Optional[str] = None) -> None:
         step1 = task_extract_to_bronze_gcs(run_id=run_id, dry_run=dry_run)
         step2 = task_transform_bronze_to_silver(run_id=run_id, dry_run=dry_run, bronze_uri=step1["bronze_uri"])
         step3 = task_load_silver_to_bigquery(run_id=run_id, dry_run=dry_run, silver_uri=step2["silver_uri"])
+
+        if settings.iceberg_enabled and step2.get("iceberg_metadata_uri"):
+            task_sync_iceberg_to_bigquery(run_id=run_id, dry_run=dry_run, iceberg_metadata_uri=step2["iceberg_metadata_uri"])
+
         log_step(logger, "api_pipeline_complete", run_id=run_id, clean_rows=step2["clean_rows"], rejected_rows=step2["rejected_rows"])
     except Exception as e:
         log_step(logger, "api_pipeline_failed", run_id=run_id, error=str(e))
         raise
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Change Action API data ingestion pipeline (Medallion Architecture)")
+    parser = argparse.ArgumentParser(description="Change Action API data ingestion pipeline (Medallion Architecture + Iceberg)")
     parser.add_argument("--dry-run", action="store_true", help="Run without sending data to GCP")
-    parser.add_argument("--step", choices=["all", "bronze", "silver", "gold", "extract", "upload", "load"], default="all", help="Execute specific pipeline step")
+    parser.add_argument("--step", choices=["all", "bronze", "silver", "gold", "iceberg", "extract", "upload", "load"], default="all", help="Execute specific pipeline step")
     parser.add_argument("--run-id", type=str, default=None, help="Explicit run_id for step resumption")
     parser.add_argument("--bronze-uri", type=str, default=None, help="GCS URI for Bronze raw file")
     parser.add_argument("--silver-uri", type=str, default=None, help="GCS URI for Silver parquet file")
+    parser.add_argument("--iceberg-meta-uri", type=str, default=None, help="GCS URI for Iceberg metadata file")
     args = parser.parse_args()
 
     if args.step == "all":
@@ -374,3 +513,5 @@ if __name__ == "__main__":
         task_transform_bronze_to_silver(run_id=args.run_id, dry_run=args.dry_run, bronze_uri=args.bronze_uri)
     elif args.step in ("gold", "load"):
         task_load_silver_to_bigquery(run_id=args.run_id, dry_run=args.dry_run, silver_uri=args.silver_uri)
+    elif args.step == "iceberg":
+        task_sync_iceberg_to_bigquery(run_id=args.run_id, dry_run=args.dry_run, iceberg_metadata_uri=args.iceberg_meta_uri)
