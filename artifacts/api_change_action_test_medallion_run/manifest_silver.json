@@ -1,0 +1,10 @@
+{
+  "run_id": "test_medallion_run",
+  "silver_uri": "gs://batchpipes/processed/15102026/processed_data.parquet",
+  "files": [
+    "artifacts\\api_change_action_test_medallion_run\\silver\\15102026\\processed_data.parquet"
+  ],
+  "clean_rows": 50,
+  "rejected_rows": 0,
+  "dry_run": true
+}

@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from pipeline.run_api_pipeline import (
-    task_fetch_api_and_transform,
-    task_upload_api_to_gcs,
-    task_load_api_to_bigquery,
+    task_extract_to_bronze_gcs,
+    task_transform_bronze_to_silver,
+    task_load_silver_to_bigquery,
 )
 
 default_args = {
@@ -20,30 +20,30 @@ default_args = {
 with DAG(
     "change_action_api_pipeline_gcs",
     default_args=default_args,
-    description="Production Change Action API -> GCS -> BigQuery batch ingestion pipeline",
+    description="Production Change Action Medallion Architecture: Bronze (Raw JSON) -> Silver (Parquet) -> Gold (BigQuery WRITE_TRUNCATE)",
     start_date=datetime(2024, 1, 1),
     schedule=None,
     catchup=False,
-    tags=["api", "3dspace", "gcs", "bigquery", "production"],
+    tags=["api", "medallion", "bronze", "silver", "gold", "gcs", "bigquery", "production"],
 ) as dag:
 
-    # Task 1: Fetch from API / sample.json & Transform to Parquet
-    fetch_api_and_transform = PythonOperator(
-        task_id="fetch_api_and_transform",
-        python_callable=task_fetch_api_and_transform,
+    # Task 1 (Bronze): Extract raw API/fallback data to GCS bronze/ddmmyyyy/rawfile.json
+    extract_to_bronze = PythonOperator(
+        task_id="extract_to_bronze",
+        python_callable=task_extract_to_bronze_gcs,
     )
 
-    # Task 2: Upload Parquet Files to GCS
-    upload_api_to_gcs = PythonOperator(
-        task_id="upload_api_to_gcs",
-        python_callable=task_upload_api_to_gcs,
+    # Task 2 (Silver): Read from GCS, validate & transform, save to GCS processed/ddmmyyyy/processed_data.parquet
+    transform_bronze_to_silver = PythonOperator(
+        task_id="transform_bronze_to_silver",
+        python_callable=task_transform_bronze_to_silver,
     )
 
-    # Task 3: Load Parquet from GCS into BigQuery (table: change_actions_clean)
-    load_api_to_bigquery = PythonOperator(
-        task_id="load_api_to_bigquery",
-        python_callable=task_load_api_to_bigquery,
+    # Task 3 (Gold): Load Parquet from GCS Silver layer into BigQuery with WRITE_TRUNCATE
+    load_silver_to_bigquery = PythonOperator(
+        task_id="load_silver_to_bigquery",
+        python_callable=task_load_silver_to_bigquery,
     )
 
     # Pipeline sequence
-    fetch_api_and_transform >> upload_api_to_gcs >> load_api_to_bigquery
+    extract_to_bronze >> transform_bronze_to_silver >> load_silver_to_bigquery

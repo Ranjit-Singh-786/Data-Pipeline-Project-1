@@ -2,7 +2,7 @@ import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict, Any, Union
 import pyarrow as pa
 import pyarrow.parquet as pq
 from google.cloud import bigquery, storage
@@ -29,8 +29,17 @@ def save_rejected_records(rejected_records: list, output_path: Path) -> None:
         for rec in rejected_records:
             f.write(json.dumps(rec, default=str) + "\n")
 
-def fetch_change_actions(settings: Settings, logger) -> List[Dict[str, Any]]:
-    """Fetches Change Actions from live API or falls back to sample.json."""
+def parse_gcs_uri(uri: str) -> Tuple[str, str]:
+    """Extracts (bucket, blob_name) from gs://bucket/path/to/blob."""
+    if not uri.startswith("gs://"):
+        raise ValueError(f"Invalid GCS URI: {uri}")
+    parts = uri[5:].split("/", 1)
+    bucket = parts[0]
+    blob_name = parts[1] if len(parts) > 1 else ""
+    return bucket, blob_name
+
+def fetch_raw_api_payload(settings: Settings, logger) -> Any:
+    """Fetches raw Change Actions payload from live API or falls back to sample.json."""
     if settings.change_action_api_url:
         import urllib.request
         log_step(logger, "api_fetch_start", url=settings.change_action_api_url)
@@ -48,8 +57,11 @@ def fetch_change_actions(settings: Settings, logger) -> List[Dict[str, Any]]:
             raise FileNotFoundError(f"Neither API URL nor sample JSON file found at: {sample_path}")
         with open(sample_path, "r", encoding="utf-8") as f:
             data = json.load(f)
+    return data
 
-    # Extract list of change actions
+def fetch_change_actions(settings: Settings, logger) -> List[Dict[str, Any]]:
+    """Fetches Change Actions list from live API or falls back to sample.json."""
+    data = fetch_raw_api_payload(settings, logger)
     if isinstance(data, dict):
         items = data.get("changeAction") or data.get("items") or data.get("data") or []
     elif isinstance(data, list):
@@ -93,9 +105,9 @@ def validate_and_transform_change_actions(raw_items: List[Dict[str, Any]]) -> Tu
     return cleaned, rejected
 
 # ---------------------------------------------------------------------------
-# STEP 1: Fetch API & Transform to Parquet  
+# STEP 1 (Bronze Layer): Fetch API Raw Data & Upload to GCS bronze/ddmmyyyy/rawfile.json
 # ---------------------------------------------------------------------------
-def task_fetch_api_and_transform(run_id: Optional[str] = None, dry_run: bool = False, **kwargs) -> dict:
+def task_extract_to_bronze_gcs(run_id: Optional[str] = None, dry_run: bool = False, date_str: Optional[str] = None, **kwargs) -> dict:
     settings = Settings()
     dry_run = dry_run or settings.dry_run
     logger = get_logger("change_action_api_pipeline", log_file=settings.log_file)
@@ -107,158 +119,224 @@ def task_fetch_api_and_transform(run_id: Optional[str] = None, dry_run: bool = F
         else:
             run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
-    log_step(logger, "api_step_extract_transform_start", run_id=run_id, dry_run=dry_run)
+    date_str = date_str or datetime.now(timezone.utc).strftime("%d%m%Y")
+    log_step(logger, "bronze_extract_start", run_id=run_id, date_str=date_str, dry_run=dry_run)
 
     artifact_dir = Path(settings.artifact_dir) / f"api_change_action_{run_id}"
-    artifact_dir.mkdir(parents=True, exist_ok=True)
+    bronze_dir = artifact_dir / "bronze" / date_str
+    bronze_dir.mkdir(parents=True, exist_ok=True)
+    bronze_local_path = bronze_dir / "rawfile.json"
 
     try:
-        raw_items = fetch_change_actions(settings, logger)
-        clean_records, bad_records = validate_and_transform_change_actions(raw_items)
+        raw_payload = fetch_raw_api_payload(settings, logger)
+        with open(bronze_local_path, "w", encoding="utf-8") as f:
+            json.dump(raw_payload, f, indent=2)
 
-        if bad_records:
-            quarantine_path = artifact_dir / "rejected.jsonl"
-            save_rejected_records(bad_records, quarantine_path)
-            log_step(logger, "api_dead_letter_saved", path=str(quarantine_path), count=len(bad_records))
-
-        files = []
-        if clean_records:
-            # Batch parquet write if large
-            part_path = artifact_dir / "part-00001.parquet"
-            write_parquet(clean_records, part_path)
-            files.append(part_path)
-            log_step(logger, "api_batch_transformed_to_parquet", rows=len(clean_records), path=str(part_path))
+        gcs_blob_name = f"bronze/{date_str}/rawfile.json"
+        if dry_run:
+            bucket_name = settings.bucket or "mock-bucket"
+            bronze_uri = f"gs://{bucket_name}/{gcs_blob_name}"
+            log_step(logger, "bronze_gcs_upload_simulated", path=str(bronze_local_path), uri=bronze_uri)
+        else:
+            settings.validate_gcp_config()
+            storage_client = storage.Client(project=settings.project_id)
+            bucket = storage_client.bucket(settings.bucket)
+            blob = bucket.blob(gcs_blob_name)
+            blob.upload_from_filename(str(bronze_local_path))
+            bronze_uri = f"gs://{settings.bucket}/{gcs_blob_name}"
+            log_step(logger, "bronze_gcs_upload", path=str(bronze_local_path), uri=bronze_uri)
 
         result_payload = {
             "run_id": run_id,
+            "bronze_uri": bronze_uri,
+            "date_str": date_str,
             "artifact_dir": str(artifact_dir),
-            "files": [str(p) for p in files],
+            "raw_file": str(bronze_local_path),
+            "dry_run": dry_run,
+        }
+
+        manifest_path = artifact_dir / "manifest_bronze.json"
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(result_payload, f, indent=2)
+
+        log_step(logger, "bronze_extract_complete", **result_payload)
+        return result_payload
+
+    except Exception as e:
+        log_step(logger, "bronze_extract_failed", run_id=run_id, error=str(e))
+        raise
+
+# ---------------------------------------------------------------------------
+# STEP 2 (Silver Layer): Read Raw Data from GCS, Validate/Transform, Upload Parquet to GCS
+# ---------------------------------------------------------------------------
+def task_transform_bronze_to_silver(run_id: Optional[str] = None, dry_run: bool = False, bronze_uri: Optional[str] = None, **kwargs) -> dict:
+    settings = Settings()
+    dry_run = dry_run or settings.dry_run
+    logger = get_logger("change_action_api_pipeline", log_file=settings.log_file)
+
+    ti = kwargs.get("ti")
+    date_str = None
+    if ti and not bronze_uri:
+        upstream_data = ti.xcom_pull(task_ids="extract_to_bronze") or ti.xcom_pull(task_ids="task_extract_to_bronze_gcs") or ti.xcom_pull(task_ids="fetch_api_and_transform")
+        if upstream_data:
+            bronze_uri = upstream_data.get("bronze_uri", bronze_uri)
+            run_id = upstream_data.get("run_id", run_id)
+            date_str = upstream_data.get("date_str")
+            dry_run = upstream_data.get("dry_run", dry_run)
+
+    if not run_id:
+        ti_obj = kwargs.get("ti")
+        if ti_obj and hasattr(ti_obj, "execution_date") and ti_obj.execution_date:
+            run_id = ti_obj.execution_date.strftime("%Y%m%dT%H%M%SZ")
+        else:
+            run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+    if not date_str:
+        if bronze_uri and "bronze/" in bronze_uri:
+            parts = bronze_uri.split("bronze/")[1].split("/")
+            date_str = parts[0]
+        else:
+            date_str = datetime.now(timezone.utc).strftime("%d%m%Y")
+
+    artifact_dir = Path(settings.artifact_dir) / f"api_change_action_{run_id}"
+    silver_dir = artifact_dir / "silver" / date_str
+    silver_dir.mkdir(parents=True, exist_ok=True)
+
+    log_step(logger, "silver_transform_start", run_id=run_id, bronze_uri=bronze_uri, dry_run=dry_run)
+
+    try:
+        # Read raw data from GCS using GCS URI / object path
+        if dry_run or not bronze_uri:
+            bronze_local_path = artifact_dir / "bronze" / date_str / "rawfile.json"
+            if bronze_local_path.exists():
+                with open(bronze_local_path, "r", encoding="utf-8") as f:
+                    raw_data = json.load(f)
+            else:
+                raw_data = fetch_raw_api_payload(settings, logger)
+        else:
+            bucket_name, blob_name = parse_gcs_uri(bronze_uri)
+            storage_client = storage.Client(project=settings.project_id)
+            blob = storage_client.bucket(bucket_name).blob(blob_name)
+            raw_text = blob.download_as_text()
+            raw_data = json.loads(raw_text)
+
+        # Extract items
+        if isinstance(raw_data, dict):
+            raw_items = raw_data.get("changeAction") or raw_data.get("items") or raw_data.get("data") or []
+        elif isinstance(raw_data, list):
+            raw_items = raw_data
+        else:
+            raw_items = []
+
+        clean_records, bad_records = validate_and_transform_change_actions(raw_items)
+
+        if bad_records:
+            quarantine_path = silver_dir / "rejected.jsonl"
+            save_rejected_records(bad_records, quarantine_path)
+            log_step(logger, "api_dead_letter_saved", path=str(quarantine_path), count=len(bad_records))
+
+        silver_parquet_path = silver_dir / "processed_data.parquet"
+        write_parquet(clean_records, silver_parquet_path)
+        log_step(logger, "silver_transformed_to_parquet", rows=len(clean_records), path=str(silver_parquet_path))
+
+        # Save to GCS: processed/ddmmyyyy/processed_data.parquet
+        silver_blob_name = f"processed/{date_str}/processed_data.parquet"
+        if dry_run:
+            bucket_name = settings.bucket or "mock-bucket"
+            silver_uri = f"gs://{bucket_name}/{silver_blob_name}"
+            log_step(logger, "silver_gcs_upload_simulated", path=str(silver_parquet_path), uri=silver_uri)
+        else:
+            settings.validate_gcp_config()
+            storage_client = storage.Client(project=settings.project_id)
+            bucket = storage_client.bucket(settings.bucket)
+            blob = bucket.blob(silver_blob_name)
+            blob.upload_from_filename(str(silver_parquet_path))
+            silver_uri = f"gs://{settings.bucket}/{silver_blob_name}"
+            log_step(logger, "silver_gcs_upload", path=str(silver_parquet_path), uri=silver_uri)
+
+        result_payload = {
+            "run_id": run_id,
+            "silver_uri": silver_uri,
+            "files": [str(silver_parquet_path)],
             "clean_rows": len(clean_records),
             "rejected_rows": len(bad_records),
             "dry_run": dry_run,
         }
 
-        manifest_path = artifact_dir / "manifest.json"
+        manifest_path = artifact_dir / "manifest_silver.json"
         with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(result_payload, f, indent=2)
 
-        log_step(logger, "api_step_extract_transform_complete", **result_payload)
+        log_step(logger, "silver_transform_complete", **result_payload)
         return result_payload
 
     except Exception as e:
-        log_step(logger, "api_step_extract_transform_failed", run_id=run_id, error=str(e))
+        log_step(logger, "silver_transform_failed", run_id=run_id, error=str(e))
         raise
 
 # ---------------------------------------------------------------------------
-# STEP 2: Upload API Parquet Files to GCS
+# STEP 3 (Gold Layer): Load from GCS (Silver Parquet) into BigQuery (WRITE_TRUNCATE)
 # ---------------------------------------------------------------------------
-def task_upload_api_to_gcs(run_id: Optional[str] = None, dry_run: bool = False, files: Optional[List[str]] = None, **kwargs) -> dict:
+def task_load_silver_to_bigquery(run_id: Optional[str] = None, dry_run: bool = False, silver_uri: Optional[str] = None, uris: Optional[List[str]] = None, **kwargs) -> dict:
     settings = Settings()
     dry_run = dry_run or settings.dry_run
     logger = get_logger("change_action_api_pipeline", log_file=settings.log_file)
 
     ti = kwargs.get("ti")
-    if ti and (not run_id or not files):
-        upstream_data = ti.xcom_pull(task_ids="fetch_api_and_transform")
+    if ti and (not run_id or (not silver_uri and not uris)):
+        upstream_data = ti.xcom_pull(task_ids="transform_bronze_to_silver") or ti.xcom_pull(task_ids="task_transform_bronze_to_silver") or ti.xcom_pull(task_ids="upload_api_to_gcs")
         if upstream_data:
             run_id = upstream_data.get("run_id", run_id)
-            files = upstream_data.get("files", files)
+            silver_uri = upstream_data.get("silver_uri", silver_uri)
+            if not silver_uri and upstream_data.get("uris"):
+                silver_uri = upstream_data["uris"][0]
             dry_run = upstream_data.get("dry_run", dry_run)
 
     if not run_id:
-        raise ValueError("Missing run_id for task_upload_api_to_gcs.")
-
-    if not dry_run:
-        settings.validate_gcp_config()
-
-    artifact_dir = Path(settings.artifact_dir) / f"api_change_action_{run_id}"
-    if not files and artifact_dir.exists():
-        files = [str(p) for p in artifact_dir.glob("part-*.parquet")]
-
-    if not files:
-        log_step(logger, "api_step_upload_gcs_skipped", run_id=run_id, message="No parquet files to upload.")
-        return {"run_id": run_id, "uris": [], "files_count": 0, "dry_run": dry_run}
-
-    log_step(logger, "api_step_upload_gcs_start", run_id=run_id, files_count=len(files), dry_run=dry_run)
-    uris = []
-    try:
-        if dry_run:
-            bucket_name = settings.bucket or "mock-bucket"
-            for file_path in files:
-                p = Path(file_path)
-                fake_uri = f"gs://{bucket_name}/{settings.api_gcs_prefix}/{run_id}/{p.name}"
-                uris.append(fake_uri)
-                log_step(logger, "api_gcs_upload_simulated", path=str(p), uri=fake_uri)
+        ti_obj = kwargs.get("ti")
+        if ti_obj and hasattr(ti_obj, "execution_date") and ti_obj.execution_date:
+            run_id = ti_obj.execution_date.strftime("%Y%m%dT%H%M%SZ")
         else:
-            storage_client = storage.Client(project=settings.project_id)
-            bucket = storage_client.bucket(settings.bucket)
-            for file_path in files:
-                p = Path(file_path)
-                blob = bucket.blob(f"{settings.api_gcs_prefix}/{run_id}/{p.name}")
-                blob.upload_from_filename(str(p))
-                uri = f"gs://{settings.bucket}/{blob.name}"
-                uris.append(uri)
-                log_step(logger, "api_gcs_upload", path=str(p), uri=uri)
+            run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
-        result_payload = {
-            "run_id": run_id,
-            "uris": uris,
-            "files_count": len(files),
-            "dry_run": dry_run,
-        }
-        log_step(logger, "api_step_upload_gcs_complete", **result_payload)
-        return result_payload
+    target_uris = []
+    if silver_uri:
+        target_uris.append(silver_uri)
+    elif uris:
+        target_uris.extend(uris)
 
-    except Exception as e:
-        log_step(logger, "api_step_upload_gcs_failed", run_id=run_id, error=str(e))
-        raise
-
-# ---------------------------------------------------------------------------
-# STEP 3: Load from GCS into BigQuery (Table: change_actions_clean)
-# ---------------------------------------------------------------------------
-def task_load_api_to_bigquery(run_id: Optional[str] = None, dry_run: bool = False, uris: Optional[List[str]] = None, **kwargs) -> dict:
-    settings = Settings()
-    dry_run = dry_run or settings.dry_run
-    logger = get_logger("change_action_api_pipeline", log_file=settings.log_file)
-
-    ti = kwargs.get("ti")
-    if ti and (not run_id or not uris):
-        upstream_data = ti.xcom_pull(task_ids="upload_api_to_gcs")
-        if upstream_data:
-            run_id = upstream_data.get("run_id", run_id)
-            uris = upstream_data.get("uris", uris)
-            dry_run = upstream_data.get("dry_run", dry_run)
-
-    if not run_id:
-        raise ValueError("Missing run_id for task_load_api_to_bigquery.")
-
-    if not uris:
-        log_step(logger, "api_step_load_bigquery_skipped", run_id=run_id, message="No URIs to load into BigQuery.")
+    if not target_uris:
+        log_step(logger, "api_step_load_bigquery_skipped", run_id=run_id, message="No Silver URIs to load into BigQuery.")
         return {"run_id": run_id, "status": "SKIPPED", "loaded_uris": 0}
 
     table_id = f"{settings.project_id}.{settings.dataset}.{settings.api_table}" if settings.project_id else f"{settings.dataset}.{settings.api_table}"
-    log_step(logger, "api_step_load_bigquery_start", run_id=run_id, table=table_id, uris_count=len(uris), dry_run=dry_run)
+    log_step(logger, "api_step_load_bigquery_start", run_id=run_id, table=table_id, uris=target_uris, dry_run=dry_run)
 
     try:
         if dry_run:
-            log_step(logger, "api_bigquery_load_dry_run", run_id=run_id, uris=len(uris), table=table_id)
+            log_step(logger, "api_bigquery_load_dry_run", run_id=run_id, uris=target_uris, table=table_id, write_disposition="WRITE_TRUNCATE")
             log_step(logger, "api_step_load_bigquery_complete", run_id=run_id, table=table_id, status="SUCCESS_DRY_RUN")
-            return {"run_id": run_id, "table": table_id, "status": "SUCCESS_DRY_RUN", "loaded_uris": len(uris)}
+            return {"run_id": run_id, "table": table_id, "status": "SUCCESS_DRY_RUN", "loaded_uris": len(target_uris)}
         else:
             bq_client = bigquery.Client(project=settings.project_id)
             job_config = bigquery.LoadJobConfig(
                 source_format=bigquery.SourceFormat.PARQUET,
-                write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+                write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
                 create_disposition=bigquery.CreateDisposition.CREATE_IF_NEEDED,
             )
-            load_job = bq_client.load_table_from_uri(uris, table_id, job_config=job_config)
+            load_job = bq_client.load_table_from_uri(target_uris, table_id, job_config=job_config)
             load_job.result()
             log_step(logger, "api_step_load_bigquery_complete", run_id=run_id, table=table_id, job_id=load_job.job_id)
-            return {"run_id": run_id, "table": table_id, "status": "SUCCESS", "job_id": load_job.job_id, "loaded_uris": len(uris)}
+            return {"run_id": run_id, "table": table_id, "status": "SUCCESS", "job_id": load_job.job_id, "loaded_uris": len(target_uris)}
 
     except Exception as e:
         log_step(logger, "api_step_load_bigquery_failed", run_id=run_id, table=table_id, error=str(e))
         raise
+
+# Backward compatibility aliases
+task_fetch_api_and_transform = task_extract_to_bronze_gcs
+task_upload_api_to_gcs = task_transform_bronze_to_silver
+task_load_api_to_bigquery = task_load_silver_to_bigquery
 
 # ---------------------------------------------------------------------------
 # CLI / Standalone Runner
@@ -271,26 +349,28 @@ def run(dry_run: bool = False, run_id: Optional[str] = None) -> None:
 
     log_step(logger, "api_pipeline_start", run_id=run_id, dry_run=dry_run)
     try:
-        step1 = task_fetch_api_and_transform(run_id=run_id, dry_run=dry_run)
-        step2 = task_upload_api_to_gcs(run_id=run_id, dry_run=dry_run, files=step1["files"])
-        step3 = task_load_api_to_bigquery(run_id=run_id, dry_run=dry_run, uris=step2["uris"])
-        log_step(logger, "api_pipeline_complete", run_id=run_id, clean_rows=step1["clean_rows"], rejected_rows=step1["rejected_rows"])
+        step1 = task_extract_to_bronze_gcs(run_id=run_id, dry_run=dry_run)
+        step2 = task_transform_bronze_to_silver(run_id=run_id, dry_run=dry_run, bronze_uri=step1["bronze_uri"])
+        step3 = task_load_silver_to_bigquery(run_id=run_id, dry_run=dry_run, silver_uri=step2["silver_uri"])
+        log_step(logger, "api_pipeline_complete", run_id=run_id, clean_rows=step2["clean_rows"], rejected_rows=step2["rejected_rows"])
     except Exception as e:
         log_step(logger, "api_pipeline_failed", run_id=run_id, error=str(e))
         raise
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Change Action API data ingestion pipeline")
+    parser = argparse.ArgumentParser(description="Change Action API data ingestion pipeline (Medallion Architecture)")
     parser.add_argument("--dry-run", action="store_true", help="Run without sending data to GCP")
-    parser.add_argument("--step", choices=["all", "extract", "upload", "load"], default="all", help="Execute specific pipeline step")
+    parser.add_argument("--step", choices=["all", "bronze", "silver", "gold", "extract", "upload", "load"], default="all", help="Execute specific pipeline step")
     parser.add_argument("--run-id", type=str, default=None, help="Explicit run_id for step resumption")
+    parser.add_argument("--bronze-uri", type=str, default=None, help="GCS URI for Bronze raw file")
+    parser.add_argument("--silver-uri", type=str, default=None, help="GCS URI for Silver parquet file")
     args = parser.parse_args()
 
     if args.step == "all":
         run(dry_run=args.dry_run, run_id=args.run_id)
-    elif args.step == "extract":
-        task_fetch_api_and_transform(run_id=args.run_id, dry_run=args.dry_run)
-    elif args.step == "upload":
-        task_upload_api_to_gcs(run_id=args.run_id, dry_run=args.dry_run)
-    elif args.step == "load":
-        task_load_api_to_bigquery(run_id=args.run_id, dry_run=args.dry_run)
+    elif args.step in ("bronze", "extract"):
+        task_extract_to_bronze_gcs(run_id=args.run_id, dry_run=args.dry_run)
+    elif args.step in ("silver", "upload"):
+        task_transform_bronze_to_silver(run_id=args.run_id, dry_run=args.dry_run, bronze_uri=args.bronze_uri)
+    elif args.step in ("gold", "load"):
+        task_load_silver_to_bigquery(run_id=args.run_id, dry_run=args.dry_run, silver_uri=args.silver_uri)

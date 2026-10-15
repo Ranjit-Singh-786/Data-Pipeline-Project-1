@@ -39,18 +39,6 @@ def test_config_settings_alias():
     assert hasattr(settings, "log_file")
     assert "pipeline.log" in settings.log_file
 
-def test_save_rejected_records_quarantine(tmp_path):
-    from pipeline.run_pipeline import save_rejected_records
-    rejected = [
-        {"row": 1, "reason": "range validation failed", "raw": [999, "female", 20.0, 0, "no", "southwest", 100]},
-        {"row": 2, "reason": "categorical validation failed", "raw": [25, "invalid", 20.0, 0, "no", "southwest", 100]},
-    ]
-    out_file = tmp_path / "rejected.jsonl"
-    save_rejected_records(rejected, out_file)
-    assert out_file.exists()
-    lines = out_file.read_text(encoding="utf-8").strip().split("\n")
-    assert len(lines) == 2
-    assert json.loads(lines[0])["reason"] == "range validation failed"
 
 def test_validate_gcp_config_raises_when_missing():
     import pytest

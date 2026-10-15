@@ -6,6 +6,9 @@ from pipeline.run_api_pipeline import (
     fetch_change_actions,
     CHANGE_ACTION_SCHEMA,
     write_parquet,
+    task_extract_to_bronze_gcs,
+    task_transform_bronze_to_silver,
+    task_load_silver_to_bigquery,
 )
 from pipeline.config import Settings
 
@@ -59,5 +62,29 @@ def test_change_action_dag_structure():
     from dags.change_action_pipeline_dag import dag
     assert dag.dag_id == "change_action_api_pipeline_gcs"
     assert {t.task_id for t in dag.tasks} == {
-        "fetch_api_and_transform", "upload_api_to_gcs", "load_api_to_bigquery"
+        "extract_to_bronze", "transform_bronze_to_silver", "load_silver_to_bigquery"
     }
+
+def test_medallion_pipeline_dry_run():
+    # Bronze step
+    bronze_res = task_extract_to_bronze_gcs(run_id="test_medallion_run", dry_run=True, date_str="15102026")
+    assert "bronze/15102026/rawfile.json" in bronze_res["bronze_uri"]
+    assert Path(bronze_res["raw_file"]).exists()
+
+    # Silver step
+    silver_res = task_transform_bronze_to_silver(
+        run_id="test_medallion_run",
+        dry_run=True,
+        bronze_uri=bronze_res["bronze_uri"]
+    )
+    assert "processed/15102026/processed_data.parquet" in silver_res["silver_uri"]
+    assert silver_res["clean_rows"] > 0
+
+    # Gold step (WRITE_TRUNCATE)
+    gold_res = task_load_silver_to_bigquery(
+        run_id="test_medallion_run",
+        dry_run=True,
+        silver_uri=silver_res["silver_uri"]
+    )
+    assert gold_res["status"] == "SUCCESS_DRY_RUN"
+    assert gold_res["loaded_uris"] == 1
